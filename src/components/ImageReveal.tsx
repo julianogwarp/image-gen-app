@@ -15,6 +15,12 @@ export function ImageReveal({ src, alt, className, onLoaded, fixed = true }: Pro
   const [loaded, setLoaded] = React.useState(false);
   const [failed, setFailed] = React.useState(false);
 
+  // Reset state when src changes
+  React.useEffect(() => {
+    setLoaded(false);
+    setFailed(false);
+  }, [src]);
+
   // Safety: if the load events don't fire for any reason, reveal after a short delay
   React.useEffect(() => {
     if (loaded) return;
