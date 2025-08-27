@@ -15,6 +15,7 @@ export default function Home() {
   const [error, setError] = React.useState<string | null>(null);
   const [imageUrl, setImageUrl] = React.useState<string | null>(null);
   const [history, setHistory] = React.useState<string[]>([]);
+  const [preloadedUrls, setPreloadedUrls] = React.useState<Set<string>>(new Set());
   const generateMutation = useGenerateImage();
   const loading = generateMutation.isPending;
 
@@ -90,7 +91,16 @@ export default function Home() {
 
               {!loading && imageUrl && (
                 <>
-                  <ImageReveal src={imageUrl} alt="Generated image" className="h-full w-full" fixed />
+                  <ImageReveal 
+                    src={imageUrl} 
+                    alt="Generated image" 
+                    className="h-full w-full" 
+                    fixed 
+                    onLoaded={() => {
+                      // Preload this URL for Gallery when main image finishes
+                      setPreloadedUrls(prev => new Set(prev).add(imageUrl));
+                    }}
+                  />
                   <div className="pointer-events-none absolute right-2 top-2 opacity-0 transition-opacity group-hover:opacity-100">
                     <a
                       href={`/api/download?url=${encodeURIComponent(imageUrl)}`}
@@ -117,10 +127,16 @@ export default function Home() {
             {/* Gallery */}
             <Gallery
               images={history}
+              preloadedUrls={preloadedUrls}
               onSelect={(url) => setImageUrl(url)}
               onDelete={(url) => {
                 setHistory((prev) => prev.filter((u) => u !== url));
                 setImageUrl((curr) => (curr === url ? "" : curr));
+                setPreloadedUrls(prev => {
+                  const next = new Set(prev);
+                  next.delete(url);
+                  return next;
+                });
               }}
               className="w-full"
             />

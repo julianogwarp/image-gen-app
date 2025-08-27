@@ -10,11 +10,13 @@ export function Gallery({
   onSelect,
   className,
   onDelete,
+  preloadedUrls,
 }: {
   images: string[];
   onSelect: (url: string) => void;
   className?: string;
   onDelete?: (url: string) => void;
+  preloadedUrls?: Set<string>;
 }) {
   const loadedSetRef = React.useRef<Set<number>>(new Set());
   const [loadedCount, setLoadedCount] = React.useState(0);
@@ -26,6 +28,11 @@ export function Gallery({
       set.add(idx);
       setLoadedCount(set.size);
     }
+  }
+
+  // Check if an image URL is preloaded (main image finished loading)
+  function isPreloaded(url: string): boolean {
+    return preloadedUrls?.has(url) ?? false;
   }
 
   if (!images.length) return null;
@@ -78,10 +85,11 @@ export function Gallery({
               height={256}
               className="relative h-full w-full object-cover transition-transform group-hover:scale-105"
               unoptimized
+              priority={isPreloaded(url)} // Prioritize loading if main image finished
               onLoad={() => markLoaded(i)}
               onLoadingComplete={() => markLoaded(i)}
             />
-            {!loadedSetRef.current.has(i) && (
+            {!loadedSetRef.current.has(i) && !isPreloaded(url) && (
               <div className="absolute inset-0 grid place-items-center">
                 <div className="rounded-full bg-background/70 p-2 ring-1 ring-zinc-200 dark:ring-zinc-800">
                   <Spinner className="h-4 w-4" />
