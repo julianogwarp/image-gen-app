@@ -65,7 +65,7 @@ export function PromptForm({
         <option value="16:9">16:9</option>
         <option value="9:16">9:16</option>
       </select>
-      <Button type="submit" disabled={disabled || !prompt.trim() || prompt.length > 250}>
+      <Button type="submit" disabled={disabled || !prompt.trim() || prompt.length > 250} className="h-12">
         Generate
       </Button>
     </form>
