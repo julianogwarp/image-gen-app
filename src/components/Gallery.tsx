@@ -16,8 +16,6 @@ export function Gallery({
   className?: string;
   onDelete?: (url: string) => void;
 }) {
-  if (!images.length) return null;
-
   const loadedSetRef = React.useRef<Set<number>>(new Set());
   const [loadedCount, setLoadedCount] = React.useState(0);
   const total = images.length;
@@ -29,6 +27,8 @@ export function Gallery({
       setLoadedCount(set.size);
     }
   }
+
+  if (!images.length) return null;
 
   return (
     <div className={cn("grid gap-2", className)}>
