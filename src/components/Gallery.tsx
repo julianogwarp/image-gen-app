@@ -18,21 +18,19 @@ export function Gallery({
   onDelete?: (url: string) => void;
   preloadedUrls?: Set<string>;
 }) {
-  const loadedSetRef = React.useRef<Set<number>>(new Set());
-  const [loadedCount, setLoadedCount] = React.useState(0);
-  const total = images.length;
+  const [loadedImages, setLoadedImages] = React.useState<Set<string>>(new Set());
 
-  function markLoaded(idx: number) {
-    const set = loadedSetRef.current;
-    if (!set.has(idx)) {
-      set.add(idx);
-      setLoadedCount(set.size);
-    }
+  function markLoaded(url: string) {
+    setLoadedImages(prev => new Set(prev).add(url));
   }
 
   // Check if an image URL is preloaded (main image finished loading)
   function isPreloaded(url: string): boolean {
     return preloadedUrls?.has(url) ?? false;
+  }
+
+  function isLoaded(url: string): boolean {
+    return loadedImages.has(url) || isPreloaded(url);
   }
 
   if (!images.length) return null;
@@ -77,7 +75,7 @@ export function Gallery({
               </button>
             )}
             {/* Skeleton placeholder under the image while it loads */}
-            {!loadedSetRef.current.has(i) && <Skeleton className="absolute inset-0" />}
+            {!isLoaded(url) && <Skeleton className="absolute inset-0" />}
             <Image
               src={thumbnail(url)}
               alt="Previous image"
@@ -86,10 +84,10 @@ export function Gallery({
               className="relative h-full w-full object-cover transition-transform group-hover:scale-105"
               unoptimized
               priority={isPreloaded(url)} // Prioritize loading if main image finished
-              onLoad={() => markLoaded(i)}
-              onLoadingComplete={() => markLoaded(i)}
+              onLoad={() => markLoaded(url)}
+              onLoadingComplete={() => markLoaded(url)}
             />
-            {!loadedSetRef.current.has(i) && !isPreloaded(url) && (
+            {!isLoaded(url) && (
               <div className="absolute inset-0 grid place-items-center">
                 <div className="rounded-full bg-background/70 p-2 ring-1 ring-zinc-200 dark:ring-zinc-800">
                   <Spinner className="h-4 w-4" />
